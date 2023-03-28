@@ -12,7 +12,7 @@ Ce projet est un réducteur de lien / minimiseur d'URL simple, développé avec 
 1. Clonez ce dépôt (ou téléchargez-le manuellement) :
 
 ```
-git clone https://github.com/<your_username>/url_shortener.git
+git clone https://github.com/mathieuc22/url_shortener.git
 ```
 
 2. Accédez au répertoire du projet :

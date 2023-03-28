@@ -21,3 +21,5 @@ jsonfile.py
 .vscode/
 
 pytest_cache/
+
+urls.json

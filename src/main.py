@@ -1,6 +1,6 @@
 import json
-import random
 import string
+from secrets import choice
 from typing import List
 
 from fastapi import FastAPI, HTTPException
@@ -38,7 +38,7 @@ def write_data(data: List[UrlEntry]):
 
 
 def generate_id(size=5):
-    return "".join(random.choices(string.ascii_letters + string.digits, k=size))
+    return "".join(choice(string.ascii_letters + string.digits) for _ in range(size))
 
 
 @app.post("/urls", response_model=UrlEntry)

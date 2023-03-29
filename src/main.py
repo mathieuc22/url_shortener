@@ -22,9 +22,9 @@ app = FastAPI(
 
 FILE_NAME = "urls.json"
 DATA_FILE = Path(__file__).parent.resolve() / FILE_NAME
-ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
-SECRET_KEY = os.getenv("AWS_SECRET_KEY")
-BUCKET_NAME = os.getenv("AWS_S3_BUCKET_NAME")
+ACCESS_KEY_ID = os.getenv("ACCESS_KEY_ID")
+SECRET_KEY = os.getenv("SECRET_KEY")
+BUCKET_NAME = os.getenv("BUCKET_NAME")
 
 s3 = boto3.client(
     service_name="s3",

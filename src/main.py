@@ -9,6 +9,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.openapi.utils import get_openapi
 from mangum import Mangum
 from pydantic import BaseModel
+from pathlib import Path
 
 env = os.getenv("ENV", "prod")
 
@@ -18,7 +19,7 @@ app = FastAPI(
     version="1.0.0",
 )
 
-data_file = "urls.json"
+DATA_FILE = Path(__file__).parent.resolve() / "urls.json"
 
 
 class UrlEntry(BaseModel):
@@ -28,7 +29,7 @@ class UrlEntry(BaseModel):
 
 def read_data():
     try:
-        with open(data_file, "r") as f:
+        with open(DATA_FILE, "r") as f:
             data = json.load(f)
         return [UrlEntry(**entry) for entry in data]
     except FileNotFoundError:
@@ -36,7 +37,7 @@ def read_data():
 
 
 def write_data(data: List[UrlEntry]):
-    with open(data_file, "w") as f:
+    with open(DATA_FILE, "w") as f:
         data_as_dicts = [entry.dict() for entry in data]
         json_data = json.dumps(data_as_dicts, indent=2)
         f.write(json_data)

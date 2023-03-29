@@ -1,11 +1,16 @@
 import json
+import os
 import string
+from cgitb import handler
 from secrets import choice
 from typing import List
 
 from fastapi import FastAPI, HTTPException
 from fastapi.openapi.utils import get_openapi
+from mangum import Mangum
 from pydantic import BaseModel
+
+env = os.getenv("ENV", "prod")
 
 app = FastAPI(
     title="URL Shortener",
@@ -105,3 +110,7 @@ def custom_openapi():
 
 
 app.openapi = custom_openapi
+
+
+if env == "prod":
+    handler = Mangum(app=app)

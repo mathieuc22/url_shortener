@@ -7,8 +7,9 @@ from typing import List
 
 import boto3
 from botocore.exceptions import ClientError
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, status
 from fastapi.openapi.utils import get_openapi
+from fastapi.responses import RedirectResponse
 from mangum import Mangum
 from pydantic import BaseModel, parse_obj_as
 
@@ -91,7 +92,7 @@ def generate_id(size=5):
     return "".join(choice(string.ascii_letters + string.digits) for _ in range(size))
 
 
-@app.post("/urls", response_model=UrlEntry)
+@app.post("/urls", response_model=UrlEntry, status_code=status.HTTP_201_CREATED)
 async def create_url(url: str):
     """
     Create a new shortened URL for the given `url`.
@@ -136,7 +137,31 @@ async def get_url(id: str):
     for entry in data:
         if entry.id == id:
             return entry
-    raise HTTPException(status_code=404, detail="URL not found")
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="URL not found")
+
+
+@app.get(
+    "/{id}",
+    summary="Redirect to full URL",
+    response_description="A redirection to the full URL",
+)
+async def redirect_url(id: str):
+    """
+    Redirect the user to the full URL associated with the given short URL ID.
+
+    If the `id` is not found, returns a 404 error with a detail message.
+    """
+    data = read_data()
+    url_entry = next((entry for entry in data if entry.id == id), None)
+
+    if url_entry:
+        return RedirectResponse(
+            url=url_entry.url, status_code=status.HTTP_301_MOVED_PERMANENTLY
+        )
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="ID not found"
+        )
 
 
 def custom_openapi():

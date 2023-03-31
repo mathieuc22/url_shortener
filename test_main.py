@@ -7,7 +7,7 @@ client = TestClient(app)
 
 def test_create_url():
     response = client.post("/urls", params={"url": "https://example.com"})
-    assert response.status_code == 200
+    assert response.status_code == 201
     data = response.json()
     assert "id" in data
     assert data["url"] == "https://example.com"
@@ -34,3 +34,16 @@ def test_get_url():
 def test_get_url_not_found():
     response = client.get("/urls/nonexistentid")
     assert response.status_code == 404
+
+
+def test_redirect_url():
+    url_entry = UrlEntry(id="testid", url="https://example.com")
+    write_data([url_entry])
+
+    response = client.get(f"/{url_entry.id}", follow_redirects=False)
+    assert response.status_code == 301
+    assert response.headers["location"] == url_entry.url
+
+    # Test for non-existent ID
+    response2 = client.get("/nonexistent_id")
+    assert response2.status_code == 404

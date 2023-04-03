@@ -8,6 +8,7 @@ from typing import List
 import boto3
 from botocore.exceptions import ClientError
 from fastapi import FastAPI, HTTPException, status
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.utils import get_openapi
 from fastapi.responses import RedirectResponse
 from mangum import Mangum
@@ -181,6 +182,18 @@ def custom_openapi():
 
 app.openapi = custom_openapi
 
+origins = [
+    "http://localhost:5173",
+    "https://liencourt.cloudypanda.me",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 if ENV == "prod":
     handler = Mangum(app=app)

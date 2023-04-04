@@ -1,8 +1,11 @@
 import pytest
 from fastapi.testclient import TestClient
-from src.main import app, UrlEntry, read_data, write_data
+from src.main import api_app
+from src.api.models import UrlEntry
+from src.api.internal.data import read_data, write_data
 
-client = TestClient(app)
+
+client = TestClient(api_app)
 
 
 def test_create_url():

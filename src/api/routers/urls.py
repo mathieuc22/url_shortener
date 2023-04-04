@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import List
 
-from fastapi import APIRouter, HTTPException, Request, status
+from fastapi import APIRouter, HTTPException, Request, status, Response
 from fastapi.responses import RedirectResponse
 
 from ..internal.data import generate_id, read_data, write_data
@@ -13,7 +13,7 @@ router = APIRouter(
 
 
 @router.post("/urls", response_model=UrlEntry, status_code=status.HTTP_201_CREATED)
-async def create_url(url: str):
+async def create_url(url: str, response: Response):
     """
     Create a new shortened URL for the given `url`.
 
@@ -23,13 +23,14 @@ async def create_url(url: str):
 
     for entry in data:
         if entry.url == url:
+            response.status_code = status.HTTP_200_OK
             return entry
 
     new_id = generate_id()
     while any(entry.id == new_id for entry in data):
         new_id = generate_id()
 
-    new_entry = UrlEntry(id=new_id, url=url)
+    new_entry = UrlEntry(id=new_id, url=url, created_at=datetime.utcnow())
     data.append(new_entry)
     write_data(data)
 

@@ -1,13 +1,14 @@
 import json
 import os
 import string
+from datetime import datetime
 from pathlib import Path
 from secrets import choice
 from typing import List
 
 import boto3
 from botocore.exceptions import ClientError
-from fastapi import FastAPI, HTTPException, status
+from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.utils import get_openapi
 from fastapi.responses import RedirectResponse
@@ -35,9 +36,21 @@ s3 = boto3.client(
 )
 
 
+class ClickInfo(BaseModel):
+    timestamp: datetime
+    referrer: str
+
+
 class UrlEntry(BaseModel):
     id: str
     url: str
+    clicks: List[ClickInfo] = []
+
+    def dict(self, *args, **kwargs):
+        url_entry_dict = super().dict(*args, **kwargs)
+        for click in url_entry_dict["clicks"]:
+            click["timestamp"] = click["timestamp"].isoformat()
+        return url_entry_dict
 
 
 def read_data_local():
@@ -146,16 +159,21 @@ async def get_url(id: str):
     summary="Redirect to full URL",
     response_description="A redirection to the full URL",
 )
-async def redirect_url(id: str):
+async def redirect_url(request: Request, id: str):
     """
     Redirect the user to the full URL associated with the given short URL ID.
-
     If the `id` is not found, returns a 404 error with a detail message.
     """
     data = read_data()
     url_entry = next((entry for entry in data if entry.id == id), None)
 
     if url_entry:
+        # Enregistrez les informations de clic
+        referrer = request.headers.get("Referer", "unknown")
+        click_info = ClickInfo(timestamp=datetime.utcnow(), referrer=referrer)
+        url_entry.clicks.append(click_info)
+        write_data(data)
+
         return RedirectResponse(
             url=url_entry.url, status_code=status.HTTP_301_MOVED_PERMANENTLY
         )

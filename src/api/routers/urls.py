@@ -1,11 +1,11 @@
 from datetime import datetime
-from typing import List
+from typing import List, Optional
 
-from fastapi import APIRouter, HTTPException, Request, status, Response
+from fastapi import APIRouter, HTTPException, Request, status, Response, Body
 from fastapi.responses import RedirectResponse
 
 from ..internal.data import generate_id, read_data, write_data
-from ..models import ClickInfo, UrlEntry
+from ..models import ClickInfo, UrlEntry, CreateUrl
 
 router = APIRouter(
     tags=["urls"],
@@ -13,12 +13,24 @@ router = APIRouter(
 
 
 @router.post("/urls", response_model=UrlEntry, status_code=status.HTTP_201_CREATED)
-async def create_url(url: str, response: Response):
+async def create_url(
+    url: Optional[str] = None,
+    url_data: Optional[CreateUrl] = Body(None),
+    response: Response = None,
+):
     """
     Create a new shortened URL for the given `url`.
 
     If the `url` has already been shortened, returns the existing shortened URL.
     """
+    if not url and not url_data:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Missing URL data"
+        )
+
+    if url_data:
+        url = url_data.url
+
     data = read_data()
 
     for entry in data:

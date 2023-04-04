@@ -4,6 +4,10 @@ from typing import List
 from pydantic import BaseModel
 
 
+class CreateUrl(BaseModel):
+    url: str
+
+
 class ClickInfo(BaseModel):
     timestamp: datetime
     referrer: str

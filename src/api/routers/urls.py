@@ -93,9 +93,16 @@ async def redirect_url(request: Request, id: str):
         url_entry.clicks.append(click_info)
         write_data(data)
 
-        return RedirectResponse(
-            url=url_entry.url, status_code=status.HTTP_301_MOVED_PERMANENTLY
+        response = RedirectResponse(
+            url_entry.url, status_code=status.HTTP_301_MOVED_PERMANENTLY
         )
+        response.headers[
+            "Cache-Control"
+        ] = "no-store, no-cache, must-revalidate, max-age=0"
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
+
+        return response
     else:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="ID not found"

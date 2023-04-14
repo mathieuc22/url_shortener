@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import List, Optional
 
-from fastapi import APIRouter, HTTPException, Request, status, Response, Body
+from fastapi import APIRouter, HTTPException, Request, status, Response, Body, Query
 from fastapi.responses import RedirectResponse
 
 from ..internal.data import generate_id, read_data, write_data
@@ -78,7 +78,7 @@ async def get_url(id: str):
     summary="Redirect to full URL",
     response_description="A redirection to the full URL",
 )
-async def redirect_url(request: Request, id: str):
+async def redirect_url(request: Request, id: str, referer: str = Query(None)):
     """
     Redirect the user to the full URL associated with the given short URL ID.
     If the `id` is not found, returns a 404 error with a detail message.
@@ -87,9 +87,11 @@ async def redirect_url(request: Request, id: str):
     url_entry = next((entry for entry in data if entry.id == id), None)
 
     if url_entry:
+        if referer is None:
+            referer = request.headers.get("Referer", "unknown")
+
         # Enregistrez les informations de clic
-        referrer = request.headers.get("Referer", "unknown")
-        click_info = ClickInfo(timestamp=datetime.utcnow(), referrer=referrer)
+        click_info = ClickInfo(timestamp=datetime.utcnow(), referrer=referer)
         url_entry.clicks.append(click_info)
         write_data(data)
 

@@ -10,7 +10,7 @@ ENV = os.environ.get("APP_ENV", "dev")
 
 origins = [
     "http://localhost:5173",
-    "https://liencourt.cloudypanda.me",
+    "https://lienb.fr",
 ]
 
 

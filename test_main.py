@@ -1,7 +1,7 @@
 import pytest
 from fastapi.testclient import TestClient
 from src.main import api_app
-from src.api.models import UrlEntry
+from src.api.models import UrlEntry, ClickInfo
 from src.api.internal.data import read_data, write_data
 from datetime import datetime
 
@@ -69,4 +69,29 @@ def test_redirect_url():
 
     # Test for non-existent ID
     response2 = client.get("/nonexistent_id")
+    assert response2.status_code == 404
+
+
+def test_get_statistics():
+    url_entry = UrlEntry(
+        id="testid",
+        url="https://example.com",
+        created_at=datetime.utcnow(),
+        clicks=[
+            ClickInfo(timestamp=datetime.utcnow(), referrer="https://google.com"),
+            ClickInfo(timestamp=datetime.utcnow(), referrer="https://google.com"),
+            ClickInfo(timestamp=datetime.utcnow(), referrer="https://bing.com"),
+        ],
+    )
+    write_data([url_entry])
+
+    response = client.get(f"/statistics/{url_entry.id}")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["total_clicks"] == 3
+    assert len(data["clicks_per_day"]) >= 1
+    assert data["referrers"] == {"https://google.com": 2, "https://bing.com": 1}
+
+    # Test for non-existent ID
+    response2 = client.get("/statistics/nonexistentid")
     assert response2.status_code == 404

@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 
 from .routers.urls import router as urls_router
+from .routers.statistics import router as statistics_router
 
 app = FastAPI(
     title="URL Shortener",
@@ -9,3 +10,4 @@ app = FastAPI(
 )
 
 app.include_router(urls_router)
+app.include_router(statistics_router)

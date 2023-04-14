@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List
+from typing import Dict, List
 
 from pydantic import BaseModel
 
@@ -25,3 +25,9 @@ class UrlEntry(BaseModel):
         for click in url_entry_dict["clicks"]:
             click["timestamp"] = click["timestamp"].isoformat()
         return url_entry_dict
+
+
+class StatisticSummary(BaseModel):
+    total_clicks: int
+    clicks_per_day: Dict[str, int]
+    referrers: Dict[str, int]

@@ -13,10 +13,13 @@ class ClickInfo(BaseModel):
     referrer: str
 
 
-class UrlEntry(BaseModel):
+class UrlBasics(BaseModel):
     id: str
     url: str
     created_at: datetime
+
+
+class UrlEntry(UrlBasics):
     clicks: List[ClickInfo] = []
 
     def dict(self, *args, **kwargs):
@@ -27,7 +30,7 @@ class UrlEntry(BaseModel):
         return url_entry_dict
 
 
-class StatisticSummary(BaseModel):
+class StatisticSummary(UrlBasics):
     total_clicks: int
     clicks_per_day: Dict[str, int]
     referrers: Dict[str, int]

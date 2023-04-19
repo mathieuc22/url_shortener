@@ -1,6 +1,3 @@
-from datetime import datetime
-from typing import List
-
 from fastapi import APIRouter, Depends, HTTPException, status
 from ..internal.data import read_data
 from ..models import UrlEntry, StatisticSummary
@@ -31,13 +28,16 @@ async def get_statistics(id: str, url_entry: UrlEntry = Depends(get_url_entry)):
     referrers = {}
 
     for click in clicks:
-        date_str = click.timestamp.date().isoformat()
+        date_str = click.timestamp.date().strftime("%d/%m/%Y")
         clicks_per_day[date_str] = clicks_per_day.get(date_str, 0) + 1
 
         referrer = click.referrer
         referrers[referrer] = referrers.get(referrer, 0) + 1
 
     statistic_summary = StatisticSummary(
+        id=url_entry.id,
+        url=url_entry.url,
+        created_at=url_entry.created_at,
         total_clicks=total_clicks,
         clicks_per_day=clicks_per_day,
         referrers=referrers,
